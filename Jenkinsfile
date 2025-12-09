@@ -34,7 +34,7 @@ pipeline {
 
         stage('Run New Container') {
             steps {
-                sh "docker run -d --name ${CONTAINER_NAME} -p 8080:80 ${IMAGE_NAME}:latest"
+                sh "docker run -d --name ${CONTAINER_NAME} -p 9000:80 ${IMAGE_NAME}:latest"
             }
         }
     }
