@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Time Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <div class="login-form active" id="loginForm">
+            <h1>Employee Time Tracker</h1>
+            <form id="loginFormElement">
+                <div class="form-group">
+                    <label for="employeeId">Employee ID</label>
+                    <input type="text" id="employeeId" required>
+                </div>
+                <div class="form-group">
+                    <label for="employeeName">Employee Name</label>
+                    <input type="text" id="employeeName" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            
+            <div class="quick-employees">
+                <p style="margin-bottom: 0.5rem; color: #666; font-size: 0.9rem;">Quick Login:</p>
+                <button onclick="quickLogin('EMP001', 'John Doe')">John Doe</button>
+                <button onclick="quickLogin('EMP002', 'Jane Smith')">Jane Smith</button>
+                <button onclick="quickLogin('EMP003', 'Mike Johnson')">Mike Johnson</button>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="dashboard" id="dashboard">
+            <h2>Time Tracking Dashboard</h2>
+            
+            <div class="employee-info" id="employeeInfo">
+                <!-- Employee info will be populated here -->
+            </div>
+
+            <div class="current-time" id="currentTime">
+                <!-- Current time will be displayed here -->
+            </div>
+
+            <div class="status-card" id="statusCard">
+                <div class="time-display" id="timeDisplay">Ready to clock in</div>
+                <button class="btn btn-success" id="clockInBtn" onclick="clockIn()">Clock In</button>
+                <button class="btn btn-danger" id="clockOutBtn" onclick="clockOut()" style="display: none;">Clock Out</button>
+            </div>
+
+            <div class="hours-summary" id="hoursSummary">
+                <h3>Today's Summary</h3>
+                <div id="todayHours">Total hours worked: 0h 0m</div>
+                <div id="sessionTime" style="margin-top: 0.5rem;">Current session: 0h 0m</div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
