@@ -14,7 +14,7 @@ jobs:
       - name: Login to DockerHub (Testing)
         run: |
           echo "Logging in to DockerHub..."
-          docker login -u alavalapatikishroe -p 1994A.pshsk!!
+          docker login -u alavalapatikishore -p 1994A.pshsk!!
 
       - name: Build and Push Docker Image
         run: |
