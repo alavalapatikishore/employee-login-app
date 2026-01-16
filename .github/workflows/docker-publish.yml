@@ -1,4 +1,4 @@
-name: Docker Static Website CI/CD
+name: Docker Build and Push
 
 on:
   push:
@@ -52,37 +52,3 @@ jobs:
           echo ""
           echo "You can pull it with:"
           echo "docker pull saikishorea/employee-login-app:latest"
-
-  deploy:
-    runs-on: self-hosted
-    labels: [ k8s-master-node ]
-    needs: build-and-push
-    
-    steps:
-      - name: Configure Kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
-
-      - name: Test cluster connectivity
-        run: |
-          kubectl cluster-info
-          kubectl get nodes
-
-      - name: Apply Kubernetes manifests
-        run: |
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
-          kubectl apply -f k8s/ingress.yaml
-
-      - name: Update Deployment with new image
-        run: |
-          kubectl set image deployment/employee-login-app \
-            employee-login-app=saikishorea/employee-login-app:${{ github.sha }}
-          kubectl rollout status deployment/employee-login-app
-
-      - name: Verify Deployment
-        run: |
-          kubectl get pods -l app=employee-login-app
-          kubectl get svc employee-login-service
-          kubectl get ingress employee-login-ingress
