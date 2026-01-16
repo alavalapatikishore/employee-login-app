@@ -1,88 +1,13 @@
-name: Docker Static Website CI/CD
+name: Test Trigger
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-  workflow_dispatch:   # allows manual trigger
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  build-and-push:
-    runs-on: self-hosted
-    labels: [ k8s-master-node ]   # match your runner label
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Verify files exist
-        run: |
-          echo "Checking required files..."
-          ls -la
-          echo "Dockerfile exists: $(test -f Dockerfile && echo '✅' || echo '❌')"
-          echo "index.html exists: $(test -f index.html && echo '✅' || echo '❌')"
-          echo "style.css exists: $(test -f style.css && echo '✅' || echo '❌')"
-          echo "script.js exists: $(test -f script.js && echo '✅' || echo '❌')"
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-      
-      - name: Build Docker image
-        run: |
-          docker build -t saikishorea/employee-login-app:latest .
-          docker tag saikishorea/employee-login-app:latest \
-            saikishorea/employee-login-app:${{ github.sha }}
-      
-      - name: Push Docker images
-        run: |
-          docker push saikishorea/employee-login-app:latest
-          docker push saikishorea/employee-login-app:${{ github.sha }}
-      
-      - name: Verify pushed images
-        run: |
-          echo "✅ Image pushed to Docker Hub:"
-          echo "   - saikishorea/employee-login-app:latest"
-          echo "   - saikishorea/employee-login-app:${{ github.sha }}"
-          echo ""
-          echo "You can pull it with:"
-          echo "docker pull saikishorea/employee-login-app:latest"
-
-  deploy:
+  test:
     runs-on: self-hosted
     labels: [ k8s-master-node ]
-    needs: build-and-push
-    
     steps:
-      - name: Configure Kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
-
-      - name: Test cluster connectivity
-        run: |
-          kubectl cluster-info
-          kubectl get nodes
-
-      - name: Apply Kubernetes manifests
-        run: |
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
-          kubectl apply -f k8s/ingress.yaml
-
-      - name: Update Deployment with new image
-        run: |
-          kubectl set image deployment/employee-login-app \
-            employee-login-app=saikishorea/employee-login-app:${{ github.sha }}
-          kubectl rollout status deployment/employee-login-app
-
-      - name: Verify Deployment
-        run: |
-          kubectl get pods -l app=employee-login-app
-          kubectl get svc employee-login-service
-          kubectl get ingress employee-login-ingress
+      - run: echo "✅ Workflow triggered successfully!"
