@@ -1,19 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: employee-login
+  name: employee-login-app
+  labels:
+    app: employee-login-app
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: employee-login
+      app: employee-login-app
   template:
     metadata:
       labels:
-        app: employee-login
+        app: employee-login-app
     spec:
       containers:
-        - name: employee-login
-          image: alavalapatikishore/employee-login-app:latest
-          ports:
-            - containerPort: 80
+      - name: employee-login-app
+        image: saikishorea/employee-login-app:latest
+        ports:
+        - containerPort: 80
