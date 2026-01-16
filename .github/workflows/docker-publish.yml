@@ -9,8 +9,8 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
-    
+    runs-on: self-hosted
+    labels: [ k8s-master-node ]   # match your runner label
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -54,15 +54,11 @@ jobs:
           echo "docker pull saikishorea/employee-login-app:latest"
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    labels: [ k8s-master-node ]
     needs: build-and-push
     
     steps:
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: 'latest'
-
       - name: Configure Kubeconfig
         run: |
           mkdir -p $HOME/.kube
@@ -84,3 +80,9 @@ jobs:
           kubectl set image deployment/employee-login-app \
             employee-login-app=saikishorea/employee-login-app:${{ github.sha }}
           kubectl rollout status deployment/employee-login-app
+
+      - name: Verify Deployment
+        run: |
+          kubectl get pods -l app=employee-login-app
+          kubectl get svc employee-login-service
+          kubectl get ingress employee-login-ingress
