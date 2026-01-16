@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:   # manual trigger option
+  workflow_dispatch:   # allows manual trigger
 
 jobs:
   build-and-push:
@@ -65,7 +65,13 @@ jobs:
 
       - name: Configure Kubeconfig
         run: |
+          mkdir -p $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
+
+      - name: Test cluster connectivity
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
 
       - name: Apply Kubernetes manifests
         run: |
