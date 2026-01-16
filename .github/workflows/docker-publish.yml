@@ -2,52 +2,47 @@ name: Docker Static Website CI/CD
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
+  workflow_dispatch:   # allows manual trigger
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
-      - name: Verify files exist
+
+      - name: Build Docker image
         run: |
-          echo "Checking required files..."
-          ls -la
-          echo "Dockerfile exists: $(test -f Dockerfile && echo '✅' || echo '❌')"
-          echo "index.html exists: $(test -f index.html && echo '✅' || echo '❌')"
-          echo "style.css exists: $(test -f style.css && echo '✅' || echo '❌')"
-          echo "script.js exists: $(test -f script.js && echo '✅' || echo '❌')"
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      
+          docker build -t saikishorea/employee-login-app:${{ github.sha }} .
+          docker tag saikishorea/employee-login-app:${{ github.sha }} saikishorea/employee-login-app:latest
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      
-      - name: Build Docker image
-        run: |
-          docker build -t saikishorea/employee-login-app:latest .
-          docker tag saikishorea/employee-login-app:latest \
-            saikishorea/employee-login-app:${{ github.sha }}
-      
+
       - name: Push Docker images
         run: |
-          docker push saikishorea/employee-login-app:latest
           docker push saikishorea/employee-login-app:${{ github.sha }}
-      
-      - name: Verify pushed images
+          docker push saikishorea/employee-login-app:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'latest'
+
+      - name: Configure Kubeconfig
         run: |
-          echo "✅ Image pushed to Docker Hub:"
-          echo "   - saikishorea/employee-login-app:latest"
-          echo "   - saikishorea/employee-login-app:${{ github.sha }}"
-          echo ""
-          echo "You can pull it with:"
-          echo "docker pull saikishorea/employee-login-app:latest"
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl set image deployment/employee-login-app \
+            employee-login-app=saikishorea/employee-login-app:${{ github.sha }}
+          kubectl rollout status deployment/employee-login-app
