@@ -61,6 +61,10 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
+          # Ensure deployment exists or create/update it
+          kubectl apply -f deployment.yaml
+          # Update image to the new commit SHA
           kubectl set image deployment/employee-login-app \
             employee-login-app=saikishorea/employee-login-app:${{ github.sha }}
+          # Wait for rollout to finish
           kubectl rollout status deployment/employee-login-app
