@@ -1,7 +1,7 @@
 FROM nginx:alpine
 
 # Copy all site files into NGINX html directory
-COPY . /usr/share/nginx/html/
+COPY . /usr/share/nginx/html/s
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
